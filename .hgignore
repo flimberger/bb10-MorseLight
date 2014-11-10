@@ -1,0 +1,8 @@
+# file endings
+^.*\.o$
+^.*\.so(.|[0-9])*$
+
+# directories
+^\.settings/.*$
+^arm/.*$
+^extern/.*$
