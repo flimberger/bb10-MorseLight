@@ -19,7 +19,6 @@
 #include "MorseSender.hpp"
 
 #include "pk/bbdevice/Flashlight.hpp"
-#include "pk/signal/MorseSignal.hpp"
 
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
@@ -35,7 +34,7 @@ using namespace bb::cascades;
 ApplicationUI::ApplicationUI()
   : QObject {},
     m_light { new Flashlight { this } },
-    m_sender { new MorseSender { m_light, this } },
+    m_sender { new MorseSender { m_light } },
     m_sendingThread { new QThread { this } }
 {
     // prepare the localization
@@ -68,7 +67,8 @@ ApplicationUI::ApplicationUI()
 
     bool success;
 
-    success = connect(this, SIGNAL(sendMessage(QString)), m_sender, SLOT(sendSignal(QString)));
+    success = connect(this, SIGNAL(sendMessage(pk::signal::MorseSignal)),
+                      m_sender, SLOT(sendSignal(pk::signal::MorseSignal)));
     Q_ASSERT(success);
     success = connect(m_sender, SIGNAL(sendingDone()), this, SLOT(onSendingDone()));
     Q_ASSERT(success);
@@ -89,7 +89,7 @@ void ApplicationUI::toggleLight()
 
 void ApplicationUI::send(const QString &message)
 {
-    emit sendMessage(message);
+    emit sendMessage(MorseSignal::fromString(message));
 }
 
 void ApplicationUI::onSystemLanguageChanged()

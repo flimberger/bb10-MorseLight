@@ -18,10 +18,5 @@
         <source>Tab 2</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="../assets/main.qml" line="41"/>
-        <source>Second tab</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 </TS>

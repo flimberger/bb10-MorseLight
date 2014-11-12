@@ -37,8 +37,18 @@ TabbedPane {
         title: qsTr("Tab 2") + Retranslate.onLocaleOrLanguageChanged
         Page {
             Container {
-                Label {
-                    text: qsTr("Second tab") + Retranslate.onLocaleOrLanguageChanged
+                TextField {
+                    id: messageField
+                    hintText: "Message"
+                    inputMode: TextFieldInputMode.Text
+                    
+                    input {
+                        submitKey: SubmitKey.Send
+                        
+                        onSubmitted: {
+                            _appUI.send(messageField.text);
+                        }
+                    }
                 }
             }
         }

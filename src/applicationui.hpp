@@ -17,6 +17,8 @@
 #ifndef ApplicationUI_HPP_
 #define ApplicationUI_HPP_
 
+#include "pk/signal/MorseSignal.hpp"
+
 #include <QObject>
 
 class MorseSender;
@@ -60,7 +62,7 @@ public:
     Q_INVOKABLE void send(const QString &message);
 
 Q_SIGNALS:
-    void sendMessage(QString);
+    void sendMessage(pk::signal::MorseSignal);
 
 private slots:
     void onSystemLanguageChanged();

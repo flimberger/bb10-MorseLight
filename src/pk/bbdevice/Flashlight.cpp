@@ -19,17 +19,22 @@ Flashlight::Flashlight(QObject *parent)
     m_camHandle { CAMERA_HANDLE_INVALID },
     m_lightOn { false }
 {
-    auto hasLight = camera_can_feature(m_camHandle, CAMERA_FEATURE_VIDEOLIGHT);
+    auto error = camera_open(CAMERA_UNIT_REAR, CAMERA_MODE_PREAD | CAMERA_MODE_PWRITE,
+                             &m_camHandle);
 
-    if (hasLight) {
-        auto error = camera_open(CAMERA_UNIT_REAR, CAMERA_MODE_PREAD | CAMERA_MODE_PWRITE,
-                                 &m_camHandle);
+    if (error == CAMERA_EOK) {
+        auto hasLight = camera_can_feature(m_camHandle, CAMERA_FEATURE_VIDEOLIGHT);
 
-        if (error != CAMERA_EOK) {
-            qDebug("Flashlight error: failed to open camera: %s.", errorStr(error).c_str());
+        if (!hasLight) {
+            qDebug("Flashlight error: video light not available.");
+            error = camera_close(m_camHandle);
+            if (error != CAMERA_EOK) {
+                qDebug("Flashlight error: failed to close camera: %s.", errorStr(error).c_str());
+            }
+            m_camHandle = CAMERA_HANDLE_INVALID;
         }
     } else {
-        qDebug("Flashlight error: video light not available.");
+        qDebug("Flashlight error: failed to open camera: %s.", errorStr(error).c_str());
     }
 }
 
