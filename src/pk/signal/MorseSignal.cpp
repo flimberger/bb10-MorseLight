@@ -77,9 +77,11 @@ QString MorseSignal::toString()
         case Dash:
             string += "-";
             break;
-        case EOW:
+        case EOS:
             string += " ";
             break;
+        case EOW:
+            string += "   ";
         }
     }
 
@@ -91,42 +93,42 @@ const QVector<MorseSignal::Character> &MorseSignal::data() const
     return m_data;
 }
 
-const MorseSignal::Character MorseSignal::kA[] = { Dot,  Dash };
-const MorseSignal::Character MorseSignal::kB[] = { Dash, Dot,  Dot,  Dot };
-const MorseSignal::Character MorseSignal::kC[] = { Dash, Dot,  Dash, Dot };
-const MorseSignal::Character MorseSignal::kD[] = { Dash, Dot,  Dot };
-const MorseSignal::Character MorseSignal::kE[] = { Dot };
-const MorseSignal::Character MorseSignal::kF[] = { Dot,  Dot,  Dash, Dot };
-const MorseSignal::Character MorseSignal::kG[] = { Dash, Dash, Dot };
-const MorseSignal::Character MorseSignal::kH[] = { Dot,  Dot,  Dot,  Dot };
-const MorseSignal::Character MorseSignal::kI[] = { Dot,  Dot };
-const MorseSignal::Character MorseSignal::kJ[] = { Dot,  Dash, Dash, Dash };
-const MorseSignal::Character MorseSignal::kK[] = { Dash, Dot,  Dash };
-const MorseSignal::Character MorseSignal::kL[] = { Dot,  Dash, Dot };
-const MorseSignal::Character MorseSignal::kM[] = { Dash, Dash };
-const MorseSignal::Character MorseSignal::kN[] = { Dash, Dot };
-const MorseSignal::Character MorseSignal::kO[] = { Dash, Dash, Dash };
-const MorseSignal::Character MorseSignal::kP[] = { Dash, Dash, Dash };
-const MorseSignal::Character MorseSignal::kQ[] = { Dash, Dash, Dot,  Dash };
-const MorseSignal::Character MorseSignal::kR[] = { Dot,  Dash, Dot };
-const MorseSignal::Character MorseSignal::kS[] = { Dot,  Dot,  Dot };
-const MorseSignal::Character MorseSignal::kT[] = { Dash };
-const MorseSignal::Character MorseSignal::kU[] = { Dot,  Dot,  Dash };
-const MorseSignal::Character MorseSignal::kV[] = { Dot,  Dot,  Dot,  Dash };
-const MorseSignal::Character MorseSignal::kW[] = { Dot,  Dash, Dash };
-const MorseSignal::Character MorseSignal::kX[] = { Dash, Dot,  Dot,  Dash };
-const MorseSignal::Character MorseSignal::kY[] = { Dash, Dot,  Dash, Dash };
-const MorseSignal::Character MorseSignal::kZ[] = { Dash, Dash, Dot, Dot };
-const MorseSignal::Character MorseSignal::kD0[] = { Dash, Dash, Dash, Dash, Dash };
-const MorseSignal::Character MorseSignal::kD1[] = { Dot,  Dash, Dash, Dash, Dash };
-const MorseSignal::Character MorseSignal::kD2[] = { Dot,  Dot,  Dash, Dash, Dash };
-const MorseSignal::Character MorseSignal::kD3[] = { Dot,  Dot,  Dot,  Dash, Dash };
-const MorseSignal::Character MorseSignal::kD4[] = { Dot,  Dot,  Dot,  Dot,  Dash };
-const MorseSignal::Character MorseSignal::kD5[] = { Dot,  Dot,  Dot,  Dot,  Dot };
-const MorseSignal::Character MorseSignal::kD6[] = { Dash, Dot,  Dot,  Dot,  Dot };
-const MorseSignal::Character MorseSignal::kD7[] = { Dash, Dash, Dot,  Dot,  Dot };
-const MorseSignal::Character MorseSignal::kD8[] = { Dash, Dash, Dash, Dot,  Dot };
-const MorseSignal::Character MorseSignal::kD9[] = { Dash, Dash, Dash, Dash, Dot };
+const MorseSignal::Character MorseSignal::kA[] = { Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kB[] = { Dash, Dot,  Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kC[] = { Dash, Dot,  Dash, Dot,  EOS };
+const MorseSignal::Character MorseSignal::kD[] = { Dash, Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kE[] = { Dot,  EOS };
+const MorseSignal::Character MorseSignal::kF[] = { Dot,  Dot,  Dash, Dot,  EOS };
+const MorseSignal::Character MorseSignal::kG[] = { Dash, Dash, Dot,  EOS };
+const MorseSignal::Character MorseSignal::kH[] = { Dot,  Dot,  Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kI[] = { Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kJ[] = { Dot,  Dash, Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kK[] = { Dash, Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kL[] = { Dot,  Dash, Dot,  EOS };
+const MorseSignal::Character MorseSignal::kM[] = { Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kN[] = { Dash, Dot,  EOS };
+const MorseSignal::Character MorseSignal::kO[] = { Dash, Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kP[] = { Dash, Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kQ[] = { Dash, Dash, Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kR[] = { Dot,  Dash, Dot,  EOS };
+const MorseSignal::Character MorseSignal::kS[] = { Dot,  Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kT[] = { Dash, EOS };
+const MorseSignal::Character MorseSignal::kU[] = { Dot,  Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kV[] = { Dot,  Dot,  Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kW[] = { Dot,  Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kX[] = { Dash, Dot,  Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kY[] = { Dash, Dot,  Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kZ[] = { Dash, Dash, Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kD0[] = { Dash, Dash, Dash, Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kD1[] = { Dot,  Dash, Dash, Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kD2[] = { Dot,  Dot,  Dash, Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kD3[] = { Dot,  Dot,  Dot,  Dash, Dash, EOS };
+const MorseSignal::Character MorseSignal::kD4[] = { Dot,  Dot,  Dot,  Dot,  Dash, EOS };
+const MorseSignal::Character MorseSignal::kD5[] = { Dot,  Dot,  Dot,  Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kD6[] = { Dash, Dot,  Dot,  Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kD7[] = { Dash, Dash, Dot,  Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kD8[] = { Dash, Dash, Dash, Dot,  Dot,  EOS };
+const MorseSignal::Character MorseSignal::kD9[] = { Dash, Dash, Dash, Dash, Dot,  EOS };
 
 const QPair<size_t, const MorseSignal::Character *> MorseSignal::kLetterTable[] = {
     { sizeof(kA), &kA[0] },

@@ -21,9 +21,10 @@ class MorseSignal
 {
 public:
     enum Character {
-        Dot,  // Short
-        Dash, // Long
-        EOW   // End of word
+        EOW, // End of word (long pause)
+        EOS, // End of sign (short pause)
+        Dot, // Short signal
+        Dash // Long signal
     };
 
     static MorseSignal fromString(const QString &string);
