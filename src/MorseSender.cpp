@@ -34,14 +34,16 @@ MorseSender::MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent)
 MorseSender::~MorseSender()
 {}
 
-void MorseSender::sendSignal(const MorseSignal &morseSignal)
+void MorseSender::sendSignal(const QString &morseSignal)
 {
     // if already sending, do nothing
     if (m_sending) {
+        qDebug("MorseSender::sendSignal: already sending");
         return;
     }
 
-    m_morseSignal = morseSignal;
+    qDebug("MorseSender::sendSignal: sending '%s'", morseSignal.toUtf8().constData());
+    m_morseSignal = MorseSignal::fromString(morseSignal);
     m_sending = true;
     m_signIterator = m_morseSignal.cbegin();
     onTimeout();
@@ -49,10 +51,12 @@ void MorseSender::sendSignal(const MorseSignal &morseSignal)
 
 void MorseSender::onTimeout()
 {
+    qDebug("MorseSender::onTimeout: timeout fired.");
     if (m_light->enabled()) {
         m_light->setEnabled(false);
         if (*(++m_signIterator) == MorseSignal::EOW) {
             if (m_signIterator == m_morseSignal.cend()) {
+                qDebug("MorseSender::onTimeout: sending done.");
                 m_sending = false;
                 emit sendingDone();
 

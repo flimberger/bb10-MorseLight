@@ -32,7 +32,7 @@ public:
     explicit MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent=nullptr);
     virtual ~MorseSender();
 
-    Q_SLOT void sendSignal(const pk::signal::MorseSignal &morseSignal);
+    Q_SLOT void sendSignal(const QString &morseSignal);
 
 Q_SIGNALS:
     void sendingDone();

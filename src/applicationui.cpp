@@ -34,8 +34,7 @@ using namespace bb::cascades;
 ApplicationUI::ApplicationUI()
   : QObject {},
     m_light { new Flashlight { this } },
-    m_sender { new MorseSender { m_light } },
-    m_sendingThread { new QThread { this } }
+    m_sender { new MorseSender { m_light, this } }
 {
     // prepare the localization
     m_pTranslator = new QTranslator(this);
@@ -63,12 +62,9 @@ ApplicationUI::ApplicationUI()
     // Set created root object as the application scene
     Application::instance()->setScene(root);
 
-    m_sender->moveToThread(m_sendingThread);
-
     bool success;
 
-    success = connect(this, SIGNAL(sendMessage(pk::signal::MorseSignal)),
-                      m_sender, SLOT(sendSignal(pk::signal::MorseSignal)));
+    success = connect(this, SIGNAL(sendMessage(QString)), m_sender, SLOT(sendSignal(QString)));
     Q_ASSERT(success);
     success = connect(m_sender, SIGNAL(sendingDone()), this, SLOT(onSendingDone()));
     Q_ASSERT(success);
@@ -77,10 +73,7 @@ ApplicationUI::ApplicationUI()
 }
 
 ApplicationUI::~ApplicationUI()
-{
-    m_sendingThread->quit();
-    m_sendingThread->wait();
-}
+{}
 
 void ApplicationUI::toggleLight()
 {
@@ -89,7 +82,8 @@ void ApplicationUI::toggleLight()
 
 void ApplicationUI::send(const QString &message)
 {
-    emit sendMessage(MorseSignal::fromString(message));
+    qDebug("_appUI: sending message '%s'", message.toUtf8().constData());
+    emit sendMessage(message);
 }
 
 void ApplicationUI::onSystemLanguageChanged()
