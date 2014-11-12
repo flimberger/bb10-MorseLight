@@ -14,7 +14,7 @@ namespace pk
 namespace signal
 {
 
-static void append(QVector<MorseSignal::Character> vector, const QPair<size_t, const MorseSignal::Character *> &charPair)
+static void append(QVector<MorseSignal::Character> &vector, const QPair<size_t, const MorseSignal::Character *> &charPair)
 {
     for (size_t i = 0; i < charPair.first; ++i) {
         vector.append(charPair.second[i]);
@@ -46,6 +46,8 @@ MorseSignal MorseSignal::fromString(const QString &string)
             append(morseChars, kLetterTable[c - 0x61]);
         }
     }
+    qDebug("number of morse chars: %d", morseChars.size());
+    morseChars.append(EOW);
 
     return MorseSignal { morseChars };
 }

@@ -19,17 +19,9 @@ MorseSender::MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent)
     m_baseDuration { 1000 },
     m_signIterator {},
     m_light { flashlight },
-    m_timer { new QTimer { this } },
+    m_senderState { kEndOfMorseWord },
     m_sending { false }
-{
-    bool success = false;
-
-    success = connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
-    Q_ASSERT(success);
-    Q_UNUSED(success);
-
-    m_timer->setSingleShot(true);
-}
+{}
 
 MorseSender::~MorseSender()
 {}
@@ -44,36 +36,75 @@ void MorseSender::sendSignal(const QString &morseSignal)
 
     qDebug("MorseSender::sendSignal: sending '%s'", morseSignal.toUtf8().constData());
     m_morseSignal = MorseSignal::fromString(morseSignal);
+    qDebug("MorseSender::sendSignal: encoded as: '%s'", m_morseSignal.toString().toUtf8().constData());
     m_sending = true;
     m_signIterator = m_morseSignal.cbegin();
+    m_senderState = kSenderStart;
     onTimeout();
 }
 
 void MorseSender::onTimeout()
 {
-    qDebug("MorseSender::onTimeout: timeout fired.");
-    if (m_light->enabled()) {
-        m_light->setEnabled(false);
-        if (*(++m_signIterator) == MorseSignal::EOW) {
-            if (m_signIterator == m_morseSignal.cend()) {
-                qDebug("MorseSender::onTimeout: sending done.");
-                m_sending = false;
-                emit sendingDone();
+    auto waitFactor = 1;
 
-                return;
-            }
-            m_timer->setInterval(m_baseDuration * kLongFactor);
-            ++m_signIterator;
-        } else {
-            m_timer->setInterval(m_baseDuration);
+    qDebug("MorseSender::onTimeout: timeout fired.");
+    if (m_senderState == kEndOfMorseWord) {
+        qDebug("MorseSender: transmission ended");
+        return;
+    } else if (m_senderState == kSenderStart) {
+        qDebug("State machine init");
+        switch (*m_signIterator) {
+        case MorseSignal::EOW:
+            m_senderState = kEndOfMorseWord;
+            break;
+        case MorseSignal::EOS:
+            m_senderState = kEndOfMorseSign;
+            break;
+        case MorseSignal::Dot:
+            m_senderState = kEnableShortLight;
+            break;
+        case MorseSignal::Dash:
+            m_senderState = kEnableLongLight;
+            break;
         }
-    } else {
-        m_light->setEnabled(true);
-        if (*m_signIterator == MorseSignal::Dot) {
-            m_timer->setInterval(m_baseDuration);
-        } else if (*m_signIterator == MorseSignal::Dash) {
-            m_timer->setInterval(m_baseDuration * kShortFactor);
-        }
+        ++m_signIterator;
     }
-    m_timer->start();
+    Q_ASSERT(m_senderState != kSenderStart);
+    switch (m_senderState) {
+    case kSenderStart:
+        qDebug("Invalid state");
+        // this case is taken care of by the assert and only exists to shut up the compiler
+        break;
+    case kEnableLongLight:
+        qDebug("Enable long light");
+        m_light->setEnabled(true);
+        waitFactor = kShortFactor;
+        m_senderState = kDisableLongLight;
+        break;
+    case kDisableLongLight:
+        qDebug("Disable long light");
+        m_light->setEnabled(false);
+        m_senderState = kSenderStart;
+        break;
+    case kEnableShortLight:
+        qDebug("Enable short light");
+        m_light->setEnabled(true);
+        m_senderState = kDisableShortLight;
+        break;
+    case kDisableShortLight:
+        qDebug("Disable short light");
+        m_light->setEnabled(false);
+        m_senderState = kSenderStart;
+        break;
+    case kEndOfMorseSign:
+        qDebug("End of sign");
+        m_senderState = kSenderStart;
+        waitFactor = kShortFactor;
+        break;
+    case kEndOfMorseWord:
+        qDebug("End of word");
+        waitFactor = kLongFactor;
+        break;
+    }
+    QTimer::singleShot(m_baseDuration * waitFactor, this, SLOT(onTimeout()));
 }

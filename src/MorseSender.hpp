@@ -22,8 +22,6 @@ class Flashlight;
 } // namespace bbdevice
 } // namespace pk
 
-class QTimer;
-
 class MorseSender : public QObject
 {
     Q_OBJECT
@@ -41,13 +39,24 @@ private:
     static const auto kShortFactor = 3;
     static const auto kLongFactor = 7;
 
+    enum SenderState
+    {
+        kSenderStart,
+        kEnableLongLight,
+        kDisableLongLight,
+        kEnableShortLight,
+        kDisableShortLight,
+        kEndOfMorseSign,
+        kEndOfMorseWord
+    };
+
     Q_SLOT void onTimeout();
 
     int m_baseDuration;
     pk::signal::MorseSignal m_morseSignal;
     pk::signal::MorseSignal::const_iterator m_signIterator;
     pk::bbdevice::Flashlight *m_light;
-    QTimer *m_timer;
+    SenderState m_senderState;
     bool m_sending;
 };
 
