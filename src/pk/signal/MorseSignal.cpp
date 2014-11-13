@@ -17,19 +17,6 @@ namespace signal
 static void append(QVector<MorseSignal::Character> &vector, const MorseSignal::Character *morseChar)
 {
     for ( ; *morseChar != MorseSignal::EOS; ++morseChar) {
-        switch (*morseChar) {
-        case MorseSignal::Dot:
-            qDebug(".");
-            break;
-        case MorseSignal::Dash:
-            qDebug("-");
-            break;
-        case MorseSignal::EOS:
-            qDebug("$");
-            break;
-        case MorseSignal::EOW:
-            qDebug("$$$");
-        }
         vector.append(*morseChar);
     }
     vector.append(MorseSignal::EOS);
@@ -44,21 +31,20 @@ MorseSignal MorseSignal::fromString(const QString &string)
         if ('A' <= i->toAscii() && i->toAscii() <= 'Z') {
             auto c = i->toAscii();
 
-            qDebug("%c (%d -> %d)", c, c, c - 'A');
             append(morseChars, kLetterTable[c - 'A']);
         } else if ('a' <= i->toAscii() && i->toAscii() <= 'z') {
             auto c = i->toAscii();
 
-            qDebug("%c (%d -> %d)", c, c, c - 'a');
             append(morseChars, kLetterTable[c - 'a']);
         } else if ('0' <= i->toAscii() && i->toAscii() <= '9') {
             auto c = i->toAscii();
 
-            qDebug("%c (%d -> %d)", c, c, c - '0');
             append(morseChars, kDigitTable[c - '0']);
+        } else if (*i == ' ') {
+            Q_ASSERT(morseChars.last() == EOS);
+            morseChars.last() = EOW;
         }
     }
-    qDebug("number of morse chars: %d", morseChars.size());
     morseChars.last() = EOW;
 
     return MorseSignal { morseChars };
