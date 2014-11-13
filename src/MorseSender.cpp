@@ -40,30 +40,35 @@ void MorseSender::sendSignal(const QString &morseSignal)
     m_sending = true;
     m_signIterator = m_morseSignal.cbegin();
     m_senderState = kSenderStart;
-    onTimeout();
+    execState();
 }
 
-void MorseSender::onTimeout()
+void MorseSender::execState()
 {
     auto waitFactor = 1;
 
     qDebug("MorseSender::onTimeout: timeout fired.");
     if (m_senderState == kEndOfMorseWord) {
         qDebug("MorseSender: transmission ended");
+        m_sending = false;
         return;
-    } else if (m_senderState == kSenderStart) {
-        qDebug("State machine init");
+    }
+    if (m_senderState == kSenderStart) {
         switch (*m_signIterator) {
         case MorseSignal::EOW:
+            qDebug("State machine init: EOW");
             m_senderState = kEndOfMorseWord;
             break;
         case MorseSignal::EOS:
+            qDebug("State machine init: EOS");
             m_senderState = kEndOfMorseSign;
             break;
         case MorseSignal::Dot:
+            qDebug("State machine init: Dot");
             m_senderState = kEnableShortLight;
             break;
         case MorseSignal::Dash:
+            qDebug("State machine init: Dash");
             m_senderState = kEnableLongLight;
             break;
         }
@@ -106,5 +111,5 @@ void MorseSender::onTimeout()
         waitFactor = kLongFactor;
         break;
     }
-    QTimer::singleShot(m_baseDuration * waitFactor, this, SLOT(onTimeout()));
+    QTimer::singleShot(m_baseDuration * waitFactor, this, SLOT(execState()));
 }

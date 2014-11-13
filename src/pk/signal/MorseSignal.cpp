@@ -14,11 +14,25 @@ namespace pk
 namespace signal
 {
 
-static void append(QVector<MorseSignal::Character> &vector, const QPair<size_t, const MorseSignal::Character *> &charPair)
+static void append(QVector<MorseSignal::Character> &vector, const MorseSignal::Character *morseChar)
 {
-    for (size_t i = 0; i < charPair.first; ++i) {
-        vector.append(charPair.second[i]);
+    for ( ; *morseChar != MorseSignal::EOS; ++morseChar) {
+        switch (*morseChar) {
+        case MorseSignal::Dot:
+            qDebug(".");
+            break;
+        case MorseSignal::Dash:
+            qDebug("-");
+            break;
+        case MorseSignal::EOS:
+            qDebug("$");
+            break;
+        case MorseSignal::EOW:
+            qDebug("$$$");
+        }
+        vector.append(*morseChar);
     }
+    vector.append(MorseSignal::EOS);
 }
 
 MorseSignal MorseSignal::fromString(const QString &string)
@@ -27,27 +41,25 @@ MorseSignal MorseSignal::fromString(const QString &string)
     auto end = string.constEnd();
 
     for (auto i = string.constBegin(); i != end; ++i) {
-        if (0x30 <= i->toAscii() && i->toAscii() <= 0x39) {
+        if ('A' <= i->toAscii() && i->toAscii() <= 'Z') {
             auto c = i->toAscii();
 
-            qDebug("%c", c);
-            append(morseChars, kDigitTable[c - 0x30]);
-        }
-        if (0x41 <= i->toAscii() && i->toAscii() <= 0x5a) {
+            qDebug("%c (%d -> %d)", c, c, c - 'A');
+            append(morseChars, kLetterTable[c - 'A']);
+        } else if ('a' <= i->toAscii() && i->toAscii() <= 'z') {
             auto c = i->toAscii();
 
-            qDebug("%c", c);
-            append(morseChars, kLetterTable[c - 0x41]);
-        }
-        if (0x61 <= i->toAscii() && i->toAscii() <= 0x7a) {
+            qDebug("%c (%d -> %d)", c, c, c - 'a');
+            append(morseChars, kLetterTable[c - 'a']);
+        } else if ('0' <= i->toAscii() && i->toAscii() <= '9') {
             auto c = i->toAscii();
 
-            qDebug("%c", c);
-            append(morseChars, kLetterTable[c - 0x61]);
+            qDebug("%c (%d -> %d)", c, c, c - '0');
+            append(morseChars, kDigitTable[c - '0']);
         }
     }
     qDebug("number of morse chars: %d", morseChars.size());
-    morseChars.append(EOW);
+    morseChars.last() = EOW;
 
     return MorseSignal { morseChars };
 }
@@ -132,46 +144,46 @@ const MorseSignal::Character MorseSignal::kD7[] = { Dash, Dash, Dot,  Dot,  Dot,
 const MorseSignal::Character MorseSignal::kD8[] = { Dash, Dash, Dash, Dot,  Dot,  EOS };
 const MorseSignal::Character MorseSignal::kD9[] = { Dash, Dash, Dash, Dash, Dot,  EOS };
 
-const QPair<size_t, const MorseSignal::Character *> MorseSignal::kLetterTable[] = {
-    { sizeof(kA), &kA[0] },
-    { sizeof(kB), kB },
-    { sizeof(kC), kC },
-    { sizeof(kD), kD },
-    { sizeof(kE), kE },
-    { sizeof(kF), kF },
-    { sizeof(kG), kG },
-    { sizeof(kH), kH },
-    { sizeof(kI), kI },
-    { sizeof(kJ), kJ },
-    { sizeof(kK), kK },
-    { sizeof(kL), kL },
-    { sizeof(kM), kM },
-    { sizeof(kN), kN },
-    { sizeof(kO), kO },
-    { sizeof(kP), kP },
-    { sizeof(kQ), kQ },
-    { sizeof(kR), kR },
-    { sizeof(kS), kS },
-    { sizeof(kT), kT },
-    { sizeof(kU), kU },
-    { sizeof(kV), kV },
-    { sizeof(kW), kW },
-    { sizeof(kX), kX },
-    { sizeof(kY), kY },
-    { sizeof(kZ), kZ }
+const MorseSignal::Character *MorseSignal::kLetterTable[] = {
+    kA,
+    kB,
+    kC,
+    kD,
+    kE,
+    kF,
+    kG,
+    kH,
+    kI,
+    kJ,
+    kK,
+    kL,
+    kM,
+    kN,
+    kO,
+    kP,
+    kQ,
+    kR,
+    kS,
+    kT,
+    kU,
+    kV,
+    kW,
+    kX,
+    kY,
+    kZ
 };
 
-const QPair<size_t, const MorseSignal::Character *> MorseSignal::kDigitTable[] = {
-    { sizeof(kD0), &kD0[0] },
-    { sizeof(kD1), kD1 },
-    { sizeof(kD2), kD2 },
-    { sizeof(kD3), kD3 },
-    { sizeof(kD4), kD4 },
-    { sizeof(kD5), kD5 },
-    { sizeof(kD6), kD6 },
-    { sizeof(kD7), kD7 },
-    { sizeof(kD8), kD8 },
-    { sizeof(kD9), kD9 }
+const MorseSignal::Character *MorseSignal::kDigitTable[] = {
+    kD0,
+    kD1,
+    kD2,
+    kD3,
+    kD4,
+    kD5,
+    kD6,
+    kD7,
+    kD8,
+    kD9
 };
 
 MorseSignal::MorseSignal(const QVector<MorseSignal::Character> &morseChars)

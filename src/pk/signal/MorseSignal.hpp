@@ -75,8 +75,8 @@ private:
     static const Character kD8[];
     static const Character kD9[];
 
-    static const QPair<size_t, const Character *> kLetterTable[];
-    static const QPair<size_t, const Character *> kDigitTable[];
+    static const Character *kLetterTable[];
+    static const Character *kDigitTable[];
 
     MorseSignal(const QVector<MorseSignal::Character> &morseChars);
 

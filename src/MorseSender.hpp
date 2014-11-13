@@ -50,7 +50,7 @@ private:
         kEndOfMorseWord
     };
 
-    Q_SLOT void onTimeout();
+    Q_SLOT void execState();
 
     int m_baseDuration;
     pk::signal::MorseSignal m_morseSignal;
