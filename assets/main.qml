@@ -18,23 +18,8 @@ import bb.cascades 1.2
 
 TabbedPane {
     showTabsOnActionBar: true
-    Tab { //First tab
-        // Localized text with the dynamic translation and locale updates support
-        title: qsTr("Tab 1") + Retranslate.onLocaleOrLanguageChanged
-        Page {
-            Container {
-                Button {
-                    text: qsTr("Light") + Retranslate.onLocaleOrLanguageChanged
-                    
-                    onClicked: {
-                        _appUI.toggleLight();
-                    }
-                }
-            }
-        }
-    } //End of first tab
-    Tab { //Second tab
-        title: qsTr("Tab 2") + Retranslate.onLocaleOrLanguageChanged
+    Tab { // First tab
+        title: qsTr("Automatic") + Retranslate.onLocaleOrLanguageChanged
         Page {
             Container {
                 TextField {
@@ -46,11 +31,26 @@ TabbedPane {
                         submitKey: SubmitKey.Send
                         
                         onSubmitted: {
-                            _appUI.send(messageField.text);
+                            _sender.sendSignal(messageField.text);
                         }
                     }
                 }
             }
         }
-    } //End of second tab
+    } // End of first tab
+    Tab { // Second tab
+        // Localized text with the dynamic translation and locale updates support
+        title: qsTr("Manual") + Retranslate.onLocaleOrLanguageChanged
+        Page {
+            Container {
+                Button {
+                    text: qsTr("Light") + Retranslate.onLocaleOrLanguageChanged
+                    
+                    onClicked: {
+                        _appUI.toggleLight();
+                    }
+                }
+            }
+        }
+    } // End of second tab
 }

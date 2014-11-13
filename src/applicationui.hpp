@@ -57,10 +57,6 @@ public:
     virtual ~ApplicationUI();
 
     Q_INVOKABLE void toggleLight();
-    Q_INVOKABLE void send(const QString &message);
-
-Q_SIGNALS:
-    void sendMessage(QString);
 
 private slots:
     void onSystemLanguageChanged();

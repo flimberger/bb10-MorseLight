@@ -4,18 +4,18 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../assets/main.qml" line="23"/>
-        <source>Tab 1</source>
+        <location filename="../assets/main.qml" line="22"/>
+        <source>Automatic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../assets/main.qml" line="27"/>
+        <location filename="../assets/main.qml" line="43"/>
+        <source>Manual</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../assets/main.qml" line="47"/>
         <source>Light</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../assets/main.qml" line="37"/>
-        <source>Tab 2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

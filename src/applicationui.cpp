@@ -58,18 +58,10 @@ ApplicationUI::ApplicationUI()
     AbstractPane *root = qml->createRootObject<AbstractPane>();
 
     qml->setContextProperty("_appUI", this);
+    qml->setContextProperty("_sender", m_sender);
 
     // Set created root object as the application scene
     Application::instance()->setScene(root);
-
-    bool success;
-
-    success = connect(this, SIGNAL(sendMessage(QString)), m_sender, SLOT(sendSignal(QString)));
-    Q_ASSERT(success);
-    success = connect(m_sender, SIGNAL(sendingDone()), this, SLOT(onSendingDone()));
-    Q_ASSERT(success);
-
-    Q_UNUSED(success);
 }
 
 ApplicationUI::~ApplicationUI()
@@ -78,12 +70,6 @@ ApplicationUI::~ApplicationUI()
 void ApplicationUI::toggleLight()
 {
     m_light->setEnabled(!m_light->enabled());
-}
-
-void ApplicationUI::send(const QString &message)
-{
-    qDebug("_appUI: sending message '%s'", message.toUtf8().constData());
-    emit sendMessage(message);
 }
 
 void ApplicationUI::onSystemLanguageChanged()
