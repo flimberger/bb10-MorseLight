@@ -32,7 +32,16 @@ TabbedPane {
                         
                         onSubmitted: {
                             _sender.sendSignal(messageField.text);
+                            messageField.enabled = false;
                         }
+                    }
+                    
+                    onCreationCompleted: {
+                        _sender.sendingDone.connect(enableField);
+                    }
+                    
+                    function enableField() {
+                        enabled = true;
                     }
                 }
             }

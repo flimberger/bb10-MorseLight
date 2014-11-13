@@ -22,6 +22,7 @@
 
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
+#include <bb/cascades/TextField>
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/LocaleHandler>
 
@@ -54,11 +55,11 @@ ApplicationUI::ApplicationUI()
     // to ensure the document gets destroyed properly at shut down.
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
 
-    // Create root object for the UI
-    AbstractPane *root = qml->createRootObject<AbstractPane>();
-
     qml->setContextProperty("_appUI", this);
     qml->setContextProperty("_sender", m_sender);
+
+    // Create root object for the UI
+    AbstractPane *root = qml->createRootObject<AbstractPane>();
 
     // Set created root object as the application scene
     Application::instance()->setScene(root);

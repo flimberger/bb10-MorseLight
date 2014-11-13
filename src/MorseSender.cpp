@@ -51,6 +51,8 @@ void MorseSender::execState()
     if (m_senderState == kEndOfMorseWord) {
         qDebug("MorseSender: transmission ended");
         m_sending = false;
+
+        emit sendingDone();
         return;
     }
     if (m_senderState == kSenderStart) {
