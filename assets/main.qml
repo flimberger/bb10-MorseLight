@@ -22,10 +22,18 @@ TabbedPane {
         title: qsTr("Automatic") + Retranslate.onLocaleOrLanguageChanged
         Page {
             Container {
+                topPadding: 20
+                rightPadding: topPadding
+                bottomPadding: topPadding
+                leftPadding: topPadding
+                layout: DockLayout {}
+                
                 TextField {
                     id: messageField
                     hintText: "Message"
                     inputMode: TextFieldInputMode.Text
+                    horizontalAlignment: HorizontalAlignment.Center
+                    verticalAlignment: VerticalAlignment.Bottom
                     
                     input {
                         submitKey: SubmitKey.Send
@@ -52,8 +60,16 @@ TabbedPane {
         title: qsTr("Manual") + Retranslate.onLocaleOrLanguageChanged
         Page {
             Container {
+                topPadding: 20
+                rightPadding: topPadding
+                bottomPadding: topPadding
+                leftPadding: topPadding
+                layout: DockLayout {}
+                
                 Button {
                     text: qsTr("Light") + Retranslate.onLocaleOrLanguageChanged
+                    horizontalAlignment: HorizontalAlignment.Center
+                    verticalAlignment: VerticalAlignment.Bottom
                     
                     onClicked: {
                         _appUI.toggleLight();
