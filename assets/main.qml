@@ -18,7 +18,7 @@ import bb.cascades 1.2
 
 TabbedPane {
     showTabsOnActionBar: true
-    Tab { // First tab
+    Tab {
         title: qsTr("Automatic") + Retranslate.onLocaleOrLanguageChanged
         Page {
             Container {
@@ -54,8 +54,8 @@ TabbedPane {
                 }
             }
         }
-    } // End of first tab
-    Tab { // Second tab
+    } // Tab
+    Tab {
         // Localized text with the dynamic translation and locale updates support
         title: qsTr("Manual") + Retranslate.onLocaleOrLanguageChanged
         Page {
@@ -77,5 +77,23 @@ TabbedPane {
                 }
             }
         }
-    } // End of second tab
-}
+    } // Tab
+    
+    Menu.definition: MenuDefinition {
+        settingsAction: SettingsActionItem {
+            onTriggered: {
+                var settings = settingsSheetDefinition.createObject();
+                
+                settings.open();
+            }
+        } 
+    }
+    
+    attachedObjects: [
+        ComponentDefinition {
+            id: settingsSheetDefinition
+            
+            SettingsPage {}
+        }
+    ]
+} // TabbedPane

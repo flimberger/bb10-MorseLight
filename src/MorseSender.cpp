@@ -43,6 +43,20 @@ void MorseSender::sendSignal(const QString &morseSignal)
     execState();
 }
 
+int MorseSender::baseDuration() const
+{
+    return m_baseDuration;
+}
+
+void MorseSender::setBaseDuration(int newDuration)
+{
+    if (newDuration > 0) {
+        m_baseDuration = newDuration;
+
+        emit baseDurationChanged(newDuration);
+    }
+}
+
 void MorseSender::execState()
 {
     auto waitFactor = 1;
