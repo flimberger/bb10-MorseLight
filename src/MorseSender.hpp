@@ -30,18 +30,23 @@ class MorseSender : public QObject
                READ baseDuration
                WRITE setBaseDuration
                NOTIFY baseDurationChanged)
+    Q_PROPERTY(bool sending
+               READ sending
+               NOTIFY sendingChanged)
 public:
     explicit MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent=nullptr);
     virtual ~MorseSender();
 
+    Q_SLOT void abortTransmission();
     Q_SLOT void sendSignal(const QString &morseSignal);
 
     int baseDuration() const;
+    bool sending() const;
     void setBaseDuration(int newDuration);
 
 Q_SIGNALS:
     void baseDurationChanged(int newDuration);
-    void sendingDone();
+    void sendingChanged(bool newState);
 
 private:
     static const auto kShortFactor = 3;

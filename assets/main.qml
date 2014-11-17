@@ -28,32 +28,39 @@ TabbedPane {
                 leftPadding: topPadding
                 layout: DockLayout {}
                 
-                TextField {
-                    id: messageField
-                    hintText: "Message"
-                    inputMode: TextFieldInputMode.Text
+                Container {
                     horizontalAlignment: HorizontalAlignment.Center
                     verticalAlignment: VerticalAlignment.Bottom
+                    layout: StackLayout {}
                     
-                    input {
-                        submitKey: SubmitKey.Send
+                    TextField {
+                        id: messageField
+                        hintText: "Message"
+                        inputMode: TextFieldInputMode.Text
+                        enabled: !_sender.sending
                         
-                        onSubmitted: {
-                            _sender.sendSignal(messageField.text);
-                            messageField.enabled = false;
+                        input {
+                            submitKey: SubmitKey.Send
+                            
+                            onSubmitted: {
+                                _sender.sendSignal(messageField.text);
+                            }
                         }
                     }
                     
-                    onCreationCompleted: {
-                        _sender.sendingDone.connect(enableField);
-                    }
-                    
-                    function enableField() {
-                        enabled = true;
+                    Button {
+                        id: abortButton
+                        text: "Abort transmission"
+                        enabled: _sender.sending
+                        horizontalAlignment: HorizontalAlignment.Right
+                        
+                        onClicked: {
+                            _sender.abortTransmission();
+                        }
                     }
                 }
-            }
-        }
+            } // Container
+        } // Page
     } // Tab
     Tab {
         // Localized text with the dynamic translation and locale updates support
@@ -75,8 +82,8 @@ TabbedPane {
                         _appUI.toggleLight();
                     }
                 }
-            }
-        }
+            } // Container
+        } // Page
     } // Tab
     
     Menu.definition: MenuDefinition {

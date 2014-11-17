@@ -41,12 +41,10 @@ ApplicationUI::ApplicationUI()
     m_pTranslator = new QTranslator(this);
     m_pLocaleHandler = new LocaleHandler(this);
 
-    bool res = QObject::connect(m_pLocaleHandler, SIGNAL(systemLanguageChanged()), this, SLOT(onSystemLanguageChanged()));
+    bool success = QObject::connect(m_pLocaleHandler, SIGNAL(systemLanguageChanged()), this, SLOT(onSystemLanguageChanged()));
     // This is only available in Debug builds
-    Q_ASSERT(res);
-    // Since the variable is not used in the app, this is added to avoid a
-    // compiler warning
-    Q_UNUSED(res);
+    Q_ASSERT(success);
+    Q_UNUSED(success);
 
     // initial load
     onSystemLanguageChanged();

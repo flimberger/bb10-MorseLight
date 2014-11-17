@@ -26,6 +26,21 @@ MorseSender::MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent)
 MorseSender::~MorseSender()
 {}
 
+void MorseSender::abortTransmission()
+{
+    if (!m_sending) {
+        qDebug("MorseSender::abortTransmission: not sending");
+        return;
+    }
+    qDebug("MorseSender::abortTransmission: stopping state machine");
+    m_sending = false;
+    emit sendingChanged(false);
+    m_senderState = kSenderStart;
+    if (m_light->enabled()) {
+        m_light->setEnabled(false);
+    }
+}
+
 void MorseSender::sendSignal(const QString &morseSignal)
 {
     // if already sending, do nothing
@@ -38,6 +53,7 @@ void MorseSender::sendSignal(const QString &morseSignal)
     m_morseSignal = MorseSignal::fromString(morseSignal);
     qDebug("MorseSender::sendSignal: encoded as: '%s'", m_morseSignal.toString().toUtf8().constData());
     m_sending = true;
+    emit sendingChanged(true);
     m_signIterator = m_morseSignal.cbegin();
     m_senderState = kSenderStart;
     execState();
@@ -46,6 +62,11 @@ void MorseSender::sendSignal(const QString &morseSignal)
 int MorseSender::baseDuration() const
 {
     return m_baseDuration;
+}
+
+bool MorseSender::sending() const
+{
+    return m_sending;
 }
 
 void MorseSender::setBaseDuration(int newDuration)
@@ -59,18 +80,27 @@ void MorseSender::setBaseDuration(int newDuration)
 
 void MorseSender::execState()
 {
+    // abortTransmission() may set m_sending to false to stop sending immediately.
+    // There is be a race condition here, if the transmission is aborted and restarted immediately,
+    // so there may be two active timers bound to this slot. This might be resolved for example by
+    // using a QTimer member, which can be stopped if the transmission is aborted.
+    if (!m_sending) {
+        qDebug("MorseSender::execState: not sending");
+        return;
+    }
+
     auto waitFactor = 1;
 
-    qDebug("MorseSender::onTimeout: timeout fired.");
+    qDebug("MorseSender::execState: timeout fired.");
     if (m_senderState == kSenderStart) {
         switch (*m_signIterator) {
         case MorseSignal::EOM:
             qDebug("State machine init: EOM");
-            qDebug("MorseSender: transmission ended");
-            m_senderState = kSenderStart;
             m_sending = false;
+            emit sendingChanged(false);
+            qDebug("MorseSender::execState: transmission ended");
+            m_senderState = kSenderStart;
 
-            emit sendingDone();
             return;
         case MorseSignal::EOW:
             qDebug("State machine init: EOW");
