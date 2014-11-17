@@ -45,7 +45,7 @@ MorseSignal MorseSignal::fromString(const QString &string)
             morseChars.last() = EOW;
         }
     }
-    morseChars.last() = EOW;
+    morseChars.last() = EOM;
 
     return MorseSignal { morseChars };
 }
@@ -82,6 +82,9 @@ QString MorseSignal::toString()
             break;
         case EOW:
             string += "   ";
+            break;
+        case EOM:
+            break; // shut the compiler up
         }
     }
 

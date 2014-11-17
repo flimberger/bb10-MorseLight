@@ -21,6 +21,7 @@ class MorseSignal
 {
 public:
     enum Character {
+        EOM, // End of message
         EOW, // End of word (long pause)
         EOS, // End of sign (short pause)
         Dot, // Short signal

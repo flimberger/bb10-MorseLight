@@ -62,15 +62,16 @@ void MorseSender::execState()
     auto waitFactor = 1;
 
     qDebug("MorseSender::onTimeout: timeout fired.");
-    if (m_senderState == kEndOfMorseWord) {
-        qDebug("MorseSender: transmission ended");
-        m_sending = false;
-
-        emit sendingDone();
-        return;
-    }
     if (m_senderState == kSenderStart) {
         switch (*m_signIterator) {
+        case MorseSignal::EOM:
+            qDebug("State machine init: EOM");
+            qDebug("MorseSender: transmission ended");
+            m_senderState = kSenderStart;
+            m_sending = false;
+
+            emit sendingDone();
+            return;
         case MorseSignal::EOW:
             qDebug("State machine init: EOW");
             m_senderState = kEndOfMorseWord;
@@ -124,6 +125,7 @@ void MorseSender::execState()
         break;
     case kEndOfMorseWord:
         qDebug("End of word");
+        m_senderState = kSenderStart;
         waitFactor = kLongFactor;
         break;
     }
