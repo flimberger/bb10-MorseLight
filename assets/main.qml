@@ -42,37 +42,56 @@ TabbedPane {
                 leftPadding: topPadding
                 layout: DockLayout {}
 
-                Container {
+                Label {
+                    text: ""
+                    horizontalAlignment: HorizontalAlignment.Center
+                    verticalAlignment: VerticalAlignment.Center
+
+                    textStyle {
+                        base: SystemDefaults.TextStyles.BigText
+                    }
+
+                    onCreationCompleted: {
+                        _sender.sendingChanged.connect(setText)
+                    }
+
+                    function setText(sending) {
+                        if (sending) {
+                            text = messageField.text;
+                        } else {
+                            text = "";
+                        }
+                    }
+                } // Label
+
+                TextField {
+                    id: messageField
+                    hintText: "Message"
+                    inputMode: TextFieldInputMode.Text
+                    visible: !_sender.sending
                     horizontalAlignment: HorizontalAlignment.Center
                     verticalAlignment: VerticalAlignment.Bottom
-                    layout: StackLayout {}
 
-                    TextField {
-                        id: messageField
-                        hintText: "Message"
-                        inputMode: TextFieldInputMode.Text
-                        enabled: !_sender.sending
+                    input {
+                        submitKey: SubmitKey.Send
 
-                        input {
-                            submitKey: SubmitKey.Send
-
-                            onSubmitted: {
-                                _sender.sendSignal(messageField.text);
-                            }
+                        onSubmitted: {
+                            _sender.sendSignal(messageField.text);
                         }
                     }
+                } // TextField
 
-                    Button {
-                        id: abortButton
-                        text: "Abort transmission"
-                        enabled: _sender.sending
-                        horizontalAlignment: HorizontalAlignment.Right
+                Button {
+                    id: abortButton
+                    text: "Abort transmission"
+                    visible: _sender.sending
+                    horizontalAlignment: HorizontalAlignment.Center
+                    verticalAlignment: VerticalAlignment.Bottom
 
-                        onClicked: {
-                            _sender.abortTransmission();
-                        }
+                    onClicked: {
+                        _sender.abortTransmission();
                     }
-                }
+                } // Button
             } // Container
         } // Page
     } // Tab
