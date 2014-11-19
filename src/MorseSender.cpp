@@ -16,10 +16,13 @@
 
 #include "pk/bbdevice/Flashlight.hpp"
 
+#include <QSettings>
 #include <QTimer>
 
 using namespace pk::bbdevice;
 using namespace pk::signal;
+
+static const QString kSettingsKey = "Light/baseDuration";
 
 MorseSender::MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent)
   : QObject { parent },
@@ -28,7 +31,11 @@ MorseSender::MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent)
     m_light { flashlight },
     m_senderState { kEndOfMorseWord },
     m_sending { false }
-{}
+{
+    QSettings settings;
+
+    m_baseDuration = settings.value(kSettingsKey, 500).toInt();
+}
 
 MorseSender::~MorseSender()
 {}
@@ -82,6 +89,10 @@ void MorseSender::setBaseDuration(int newDuration)
         m_baseDuration = newDuration;
 
         emit baseDurationChanged(newDuration);
+
+        QSettings settings;
+
+        settings.setValue(kSettingsKey, newDuration);
     }
 }
 
