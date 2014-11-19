@@ -103,18 +103,14 @@ TabbedPane {
     Menu.definition: MenuDefinition {
         settingsAction: SettingsActionItem {
             onTriggered: {
-                var settings = settingsSheetDefinition.createObject();
-
-                settings.open();
+                settingsSheet.open();
             }
         }
     }
 
     attachedObjects: [
-        ComponentDefinition {
-            id: settingsSheetDefinition
-
-            SettingsPage {}
+        SettingsSheet {
+            id: settingsSheet
         }
     ]
 } // TabbedPane

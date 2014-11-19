@@ -37,7 +37,7 @@ Sheet {
                     settingsSheet.close();
                 }
             }
-        }
+        } // TitleBar
 
         Container {
             topPadding: 20
@@ -55,6 +55,6 @@ Sheet {
                 hintText: "Base signal duration"
                 text: _sender.baseDuration
             }
-        }
-    }
-}
+        } // Container
+    } // Page
+} // Sheed
