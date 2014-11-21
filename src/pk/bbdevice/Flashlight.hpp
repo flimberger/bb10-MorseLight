@@ -15,14 +15,15 @@
 #ifndef PK_BBDEVICE_CAMERA_HPP
 #define PK_BBDEVICE_CAMERA_HPP
 
-#include <camera/camera_api.h>
-
 #include <QtCore/QObject>
+#include <QtCore/QScopedPointer>
 
 namespace pk
 {
 namespace bbdevice
 {
+
+class FlashlightPrivate;
 
 class Flashlight : public QObject
 {
@@ -43,11 +44,9 @@ Q_SIGNALS:
     void enabledChanged(bool newState);
 
 private:
-    std::string errorStr(camera_error_t error);
+    QScopedPointer<FlashlightPrivate> d_ptr;
 
-    camera_handle_t m_camHandle;
-    bool m_lightOn;
-
+    Q_DECLARE_PRIVATE(Flashlight)
     Q_DISABLE_COPY(Flashlight)
 };
 

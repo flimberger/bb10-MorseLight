@@ -16,82 +16,16 @@
 
 #include <QtCore/QDebug>
 
+#include <camera/camera_api.h>
+
+#include <string>
+
 namespace pk
 {
 namespace bbdevice
 {
 
-Flashlight::Flashlight(QObject *parent)
-  : QObject { parent },
-    m_camHandle { CAMERA_HANDLE_INVALID },
-    m_lightOn { false }
-{
-    auto error = camera_open(CAMERA_UNIT_REAR, CAMERA_MODE_PREAD | CAMERA_MODE_PWRITE,
-                             &m_camHandle);
-
-    if (error == CAMERA_EOK) {
-        auto hasLight = camera_can_feature(m_camHandle, CAMERA_FEATURE_VIDEOLIGHT);
-
-        if (!hasLight) {
-            qDebug("Flashlight error: video light not available.");
-            error = camera_close(m_camHandle);
-            if (error != CAMERA_EOK) {
-                qDebug("Flashlight error: failed to close camera: %s.", errorStr(error).c_str());
-            }
-            m_camHandle = CAMERA_HANDLE_INVALID;
-        }
-    } else {
-        qDebug("Flashlight error: failed to open camera: %s.", errorStr(error).c_str());
-    }
-}
-
-Flashlight::~Flashlight()
-{
-    if (m_camHandle != CAMERA_HANDLE_INVALID) {
-        if (m_lightOn) {
-            setEnabled(false);
-        }
-
-        auto error = camera_close(m_camHandle);
-
-        if (error != CAMERA_EOK) {
-            qDebug("Failed to close camera: %s.", errorStr(error).c_str());
-        }
-    }
-}
-
-bool Flashlight::enabled() const
-{
-    return m_lightOn;
-}
-
-void Flashlight::setEnabled(bool newState)
-{
-    if (m_camHandle == CAMERA_HANDLE_INVALID) {
-        qDebug("Flashlight error: invalid camera handle");
-        return;
-    }
-
-    auto lightMode = CAMERA_VIDEOLIGHT_OFF;
-
-    if (newState) {
-        lightMode = CAMERA_VIDEOLIGHT_ON;
-    }
-
-    auto err = camera_config_videolight(m_camHandle, lightMode);
-
-    m_lightOn = !m_lightOn;
-    if (err != CAMERA_EOK) {
-        auto action = "disabling";
-
-        if (newState) {
-            action = "enabling";
-        }
-        qDebug("Flashlight error: failed to %s flashlight: %s", action, errorStr(err).c_str());
-    }
-}
-
-std::string Flashlight::errorStr(camera_error_t error)
+static std::string errorStr(camera_error_t error)
 {
     std::string str;
 
@@ -165,6 +99,93 @@ std::string Flashlight::errorStr(camera_error_t error)
     }
 
     return str;
+}
+
+struct FlashlightPrivate
+{
+    FlashlightPrivate();
+    ~FlashlightPrivate();
+
+    camera_handle_t camHandle;
+    bool lightOn;
+};
+
+FlashlightPrivate::FlashlightPrivate()
+  : camHandle { CAMERA_HANDLE_INVALID },
+    lightOn { false }
+{
+    auto error = camera_open(CAMERA_UNIT_REAR, CAMERA_MODE_PREAD | CAMERA_MODE_PWRITE, &camHandle);
+
+     if (error == CAMERA_EOK) {
+         auto hasLight = camera_can_feature(camHandle, CAMERA_FEATURE_VIDEOLIGHT);
+
+         if (!hasLight) {
+             qDebug("Flashlight error: video light not available.");
+             error = camera_close(camHandle);
+             if (error != CAMERA_EOK) {
+                 qDebug("Flashlight error: failed to close camera: %s.", errorStr(error).c_str());
+             }
+             camHandle = CAMERA_HANDLE_INVALID;
+         }
+     } else {
+         qDebug("Flashlight error: failed to open camera: %s.", errorStr(error).c_str());
+     }
+}
+
+FlashlightPrivate::~FlashlightPrivate()
+{
+    if (camHandle != CAMERA_HANDLE_INVALID) {
+        auto error = camera_close(camHandle);
+
+        if (error != CAMERA_EOK) {
+            qDebug("Failed to close camera: %s.", errorStr(error).c_str());
+        }
+    }
+}
+
+Flashlight::Flashlight(QObject *parent)
+  : QObject { parent },
+    d_ptr { new FlashlightPrivate }
+{}
+
+Flashlight::~Flashlight()
+{
+    if (d_func()->lightOn) {
+        setEnabled(false);
+    }
+}
+
+bool Flashlight::enabled() const
+{
+    return d_func()->lightOn;
+}
+
+void Flashlight::setEnabled(bool newState)
+{
+    Q_D(Flashlight);
+
+    if (d->camHandle == CAMERA_HANDLE_INVALID) {
+        qDebug("Flashlight error: invalid camera handle");
+        return;
+    }
+
+    auto lightMode = CAMERA_VIDEOLIGHT_OFF;
+
+    if (newState) {
+        lightMode = CAMERA_VIDEOLIGHT_ON;
+    }
+
+    auto err = camera_config_videolight(d->camHandle, lightMode);
+
+    d->lightOn = !d->lightOn;
+    if (err != CAMERA_EOK) {
+        auto action = "disabling";
+
+        if (newState) {
+            action = "enabling";
+        }
+        qDebug("Flashlight error: failed to %s flashlight: %s", action, errorStr(err).c_str());
+    }
 }
 
 } // namespace bbdevice
