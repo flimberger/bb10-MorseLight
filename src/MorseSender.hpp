@@ -15,7 +15,7 @@
 #ifndef MORSESENDER_HPP_
 #define MORSESENDER_HPP_
 
-#include "pk/signal/MorseSignal.hpp"
+#include "pk/signal/Morse.h" // includes QVector
 
 #include <QObject>
 
@@ -73,8 +73,8 @@ private:
     Q_SLOT void execState();
 
     int m_baseDuration;
-    pk::signal::MorseSignal m_morseSignal;
-    pk::signal::MorseSignal::const_iterator m_signIterator;
+    QVector<pk::signal::morse::char_t> m_morseSignal;
+    QVector<pk::signal::morse::char_t>::const_iterator m_signIterator;
     pk::bbdevice::Flashlight *m_light;
     SenderState m_senderState;
     bool m_sending;

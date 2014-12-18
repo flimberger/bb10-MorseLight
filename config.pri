@@ -46,13 +46,13 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
         $$quote($$BASEDIR/src/pk/bbdevice/Flashlight.cpp) \
-        $$quote($$BASEDIR/src/pk/signal/MorseSignal.cpp)
+        $$quote($$BASEDIR/src/pk/signal/Morse.cpp)
 
     HEADERS += \
         $$quote($$BASEDIR/src/MorseSender.hpp) \
         $$quote($$BASEDIR/src/applicationui.hpp) \
         $$quote($$BASEDIR/src/pk/bbdevice/Flashlight.hpp) \
-        $$quote($$BASEDIR/src/pk/signal/MorseSignal.hpp)
+        $$quote($$BASEDIR/src/pk/signal/Morse.h)
 }
 
 CONFIG += precompile_header

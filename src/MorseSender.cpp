@@ -20,7 +20,7 @@
 #include <QTimer>
 
 using namespace pk::bbdevice;
-using namespace pk::signal;
+using namespace pk::signal::morse;
 
 static const QString kSettingsKey = "Light/baseDuration";
 
@@ -64,11 +64,11 @@ void MorseSender::sendSignal(const QString &morseSignal)
     }
 
     qDebug("MorseSender::sendSignal: sending '%s'", morseSignal.toUtf8().constData());
-    m_morseSignal = MorseSignal::fromString(morseSignal);
-    qDebug("MorseSender::sendSignal: encoded as: '%s'", m_morseSignal.toString().toUtf8().constData());
+    m_morseSignal = FromString(morseSignal);
+    qDebug("MorseSender::sendSignal: encoded as: '%s'", ToString(m_morseSignal).toUtf8().constData());
     m_sending = true;
     emit sendingChanged(true);
-    m_signIterator = m_morseSignal.cbegin();
+    m_signIterator = m_morseSignal.constBegin();
     m_senderState = kSenderStart;
     execState();
 }
@@ -112,7 +112,7 @@ void MorseSender::execState()
     qDebug("MorseSender::execState: timeout fired.");
     if (m_senderState == kSenderStart) {
         switch (*m_signIterator) {
-        case MorseSignal::EOM:
+        case EOM:
             qDebug("State machine init: EOM");
             m_sending = false;
             emit sendingChanged(false);
@@ -120,19 +120,19 @@ void MorseSender::execState()
             m_senderState = kSenderStart;
 
             return;
-        case MorseSignal::EOW:
+        case EOW:
             qDebug("State machine init: EOW");
             m_senderState = kEndOfMorseWord;
             break;
-        case MorseSignal::EOS:
+        case EOS:
             qDebug("State machine init: EOS");
             m_senderState = kEndOfMorseSign;
             break;
-        case MorseSignal::Dot:
+        case DOT:
             qDebug("State machine init: Dot");
             m_senderState = kEnableShortLight;
             break;
-        case MorseSignal::Dash:
+        case DASH:
             qDebug("State machine init: Dash");
             m_senderState = kEnableLongLight;
             break;
