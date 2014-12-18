@@ -24,12 +24,48 @@ using namespace pk::signal::morse;
 
 static const QString kSettingsKey = "Light/baseDuration";
 
+//! Convert input string to ASCII and remove funny chars
+static QVector<char> SanitizeString(const QString &input)
+{
+    QVector<char> out;
+    auto str = input.toAscii();
+    auto len = str.length();
+
+    for (int i = 0; i < len; ++i) {
+        auto c = str[i];
+
+        if (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || (c == ' ')) {
+            out.append(c);
+        }
+    }
+
+    return out;
+}
+
+static const char_t *GetMorseChar(char c)
+{
+    const char_t *ptr;
+
+    if ('A' <= c && c <= 'Z') {
+        ptr = LETTER_TABLE[c - 'A'];
+    } else if ('a' <= c && c <= 'z') {
+        ptr = LETTER_TABLE[c - 'a'];
+    } else if ('0' <= c && c <= '9') {
+        ptr = DIGIT_TABLE[c - '0'];
+    } else if (c == ' ') {
+        ptr = &WORD_DELIMETER;
+    }
+
+    return ptr;
+}
+
 MorseSender::MorseSender(pk::bbdevice::Flashlight *flashlight, QObject *parent)
   : QObject { parent },
-    m_baseDuration { 1000 },
-    m_signIterator {},
+    m_currentMorseChar { nullptr },
     m_light { flashlight },
-    m_senderState { kEndOfMorseWord },
+    m_baseDuration { 1000 },
+    m_currentCharIdx { -1 },
+    m_senderState { NEXT_SIG_CHAR },
     m_sending { false }
 {
     QSettings settings;
@@ -49,7 +85,7 @@ void MorseSender::abortTransmission()
     qDebug("MorseSender::abortTransmission: stopping state machine");
     m_sending = false;
     emit sendingChanged(false);
-    m_senderState = kSenderStart;
+    m_senderState = NEXT_SIG_CHAR;
     if (m_light->enabled()) {
         m_light->setEnabled(false);
     }
@@ -63,19 +99,31 @@ void MorseSender::sendSignal(const QString &morseSignal)
         return;
     }
 
-    qDebug("MorseSender::sendSignal: sending '%s'", morseSignal.toUtf8().constData());
-    m_morseSignal = FromString(morseSignal);
-    qDebug("MorseSender::sendSignal: encoded as: '%s'", ToString(m_morseSignal).toUtf8().constData());
+    // All this encoding bullshit...
+    m_currentSignal = SanitizeString(morseSignal);
+    emit currentSignalChanged(QString::fromAscii(m_currentSignal.constData()));
+    qDebug("MorseSender::sendSignal: sending '%s'", m_currentSignal.constData());
     m_sending = true;
     emit sendingChanged(true);
-    m_signIterator = m_morseSignal.constBegin();
-    m_senderState = kSenderStart;
+    m_currentCharIdx = 0;
+    emit currentCharIdxChanged(m_currentCharIdx);
+    m_senderState = NEXT_SIG_CHAR;
     execState();
 }
 
 int MorseSender::baseDuration() const
 {
     return m_baseDuration;
+}
+
+int MorseSender::currentCharIdx() const
+{
+    return m_currentCharIdx;
+}
+
+QString MorseSender::currentSignal() const
+{
+    return QString::fromAscii(m_currentSignal.constData());
 }
 
 bool MorseSender::sending() const
@@ -96,8 +144,18 @@ void MorseSender::setBaseDuration(int newDuration)
     }
 }
 
+/*
+ * The state machine:
+ * NEXT_SIG_CHAR --------> NEXT_MORSE_CHAR
+ * NEXT_MORSE_CHAR -Dash-> DISABLE_LIGHT
+ * NEXT_MORSE_CHAR -Dot--> DISABLE_LIGHT
+ * NEXT_MORSE_CHAR -EOS--> NEXT_SIG_CHAR
+ * NEXT_MORSE_CHAR -EOW--> NEXT_SIG_CHAR
+ * DISABLE_LIGHT --------> NEXT_MORSE_CHAR
+ */
 void MorseSender::execState()
 {
+loop:
     // abortTransmission() may set m_sending to false to stop sending immediately.
     // There is be a race condition here, if the transmission is aborted and restarted immediately,
     // so there may be two active timers bound to this slot. This might be resolved for example by
@@ -109,73 +167,55 @@ void MorseSender::execState()
 
     auto waitFactor = 1;
 
-    qDebug("MorseSender::execState: timeout fired.");
-    if (m_senderState == kSenderStart) {
-        switch (*m_signIterator) {
-        case EOM:
-            qDebug("State machine init: EOM");
-            m_sending = false;
-            emit sendingChanged(false);
+    switch (m_senderState) {
+    case NEXT_SIG_CHAR:
+        if (m_currentCharIdx >= m_currentSignal.size()) {
             qDebug("MorseSender::execState: transmission ended");
-            m_senderState = kSenderStart;
+            m_sending = false;
+            emit sendingChanged(m_sending);
 
             return;
+        }
+        qDebug("Next signal char: %c %s", m_currentSignal[m_currentCharIdx],
+           ToString(GetMorseChar(m_currentSignal[m_currentCharIdx])).toAscii().constData());
+        m_currentMorseChar = GetMorseChar(m_currentSignal[m_currentCharIdx]);
+        m_senderState = NEXT_MORSE_CHAR;
+        goto loop;
+    case NEXT_MORSE_CHAR:
+        qDebug("Next morse char");
+        switch (*m_currentMorseChar) {
         case EOW:
-            qDebug("State machine init: EOW");
-            m_senderState = kEndOfMorseWord;
+            qDebug("State machine: EOW; End of word");
+            ++m_currentCharIdx;
+            m_senderState = NEXT_SIG_CHAR;
+            waitFactor = LONG_FACTOR;
             break;
         case EOS:
-            qDebug("State machine init: EOS");
-            m_senderState = kEndOfMorseSign;
+            qDebug("State machine: EOS; End of sign");
+            ++m_currentCharIdx;
+            m_senderState = NEXT_SIG_CHAR;
+            waitFactor = SHORT_FACTOR;
             break;
         case DOT:
-            qDebug("State machine init: Dot");
-            m_senderState = kEnableShortLight;
+            qDebug("State machine: Dot; Enable short light");
+            m_light->setEnabled(true);
+            m_senderState = DISABLE_LIGHT;
             break;
         case DASH:
-            qDebug("State machine init: Dash");
-            m_senderState = kEnableLongLight;
+            qDebug("State machine: Dash; Enable long light");
+            m_light->setEnabled(true);
+            waitFactor = SHORT_FACTOR;
+            m_senderState = DISABLE_LIGHT;
             break;
         }
-        ++m_signIterator;
-    }
-    Q_ASSERT(m_senderState != kSenderStart);
-    switch (m_senderState) {
-    case kSenderStart:
-        qDebug("Invalid state");
-        // this case is taken care of by the assert and only exists to shut up the compiler
         break;
-    case kEnableLongLight:
-        qDebug("Enable long light");
-        m_light->setEnabled(true);
-        waitFactor = kShortFactor;
-        m_senderState = kDisableLongLight;
-        break;
-    case kDisableLongLight:
-        qDebug("Disable long light");
-        m_light->setEnabled(false);
-        m_senderState = kSenderStart;
-        break;
-    case kEnableShortLight:
-        qDebug("Enable short light");
-        m_light->setEnabled(true);
-        m_senderState = kDisableShortLight;
-        break;
-    case kDisableShortLight:
+    case DISABLE_LIGHT:
         qDebug("Disable short light");
         m_light->setEnabled(false);
-        m_senderState = kSenderStart;
-        break;
-    case kEndOfMorseSign:
-        qDebug("End of sign");
-        m_senderState = kSenderStart;
-        waitFactor = kShortFactor;
-        break;
-    case kEndOfMorseWord:
-        qDebug("End of word");
-        m_senderState = kSenderStart;
-        waitFactor = kLongFactor;
+        m_senderState = NEXT_MORSE_CHAR;
+        ++m_currentMorseChar;
         break;
     }
+    qDebug("waiting %d time units", waitFactor);
     QTimer::singleShot(m_baseDuration * waitFactor, this, SLOT(execState()));
 }

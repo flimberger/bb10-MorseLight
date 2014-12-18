@@ -27,7 +27,6 @@ namespace morse
 {
 
 typedef enum {
-    EOM, // End of message
     EOW, // End of word (long pause)
     EOS, // End of sign (short pause)
     DOT, // Short signal
@@ -35,6 +34,7 @@ typedef enum {
 } char_t;
 
 QVector<char_t> FromString(const QString &string);
+QString ToString(const char_t *signal);
 QString ToString(const QVector<char_t> &signal);
 
 extern const char_t LETTER_A[];
@@ -73,6 +73,7 @@ extern const char_t DIGIT_6[];
 extern const char_t DIGIT_7[];
 extern const char_t DIGIT_8[];
 extern const char_t DIGIT_9[];
+extern const char_t WORD_DELIMETER;
 
 extern const char_t *const LETTER_TABLE[];
 extern const char_t *const DIGIT_TABLE[];

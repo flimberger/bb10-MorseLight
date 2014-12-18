@@ -37,6 +37,12 @@ class MorseSender : public QObject
                READ baseDuration
                WRITE setBaseDuration
                NOTIFY baseDurationChanged)
+    Q_PROPERTY(int currentCharIdx
+               READ currentCharIdx
+               NOTIFY currentCharIdxChanged)
+    Q_PROPERTY(QString currentSignal
+               READ currentSignal
+               NOTIFY currentSignalChanged)
     Q_PROPERTY(bool sending
                READ sending
                NOTIFY sendingChanged)
@@ -48,35 +54,39 @@ public:
     Q_SLOT void sendSignal(const QString &morseSignal);
 
     int baseDuration() const;
+    int currentCharIdx() const;
+    QString currentSignal() const;
     bool sending() const;
     void setBaseDuration(int newDuration);
 
 Q_SIGNALS:
     void baseDurationChanged(int newDuration);
+    void currentCharIdxChanged(int newCharIdx);
+    void currentSignalChanged(QString newSignal);
     void sendingChanged(bool newState);
 
 private:
-    static const auto kShortFactor = 3;
-    static const auto kLongFactor = 7;
+    static const auto SHORT_FACTOR = 3;
+    // A long factor is waited after a word was transmitted. In this case, a short time was already
+    // waited, because the end of a word is also the end of a character, so 3 time units are already
+    // accounted for.
+    static const auto LONG_FACTOR = 4;
 
-    enum SenderState
+    typedef enum
     {
-        kSenderStart,
-        kEnableLongLight,
-        kDisableLongLight,
-        kEnableShortLight,
-        kDisableShortLight,
-        kEndOfMorseSign,
-        kEndOfMorseWord
-    };
+        NEXT_SIG_CHAR,
+        NEXT_MORSE_CHAR,
+        DISABLE_LIGHT
+    } state_t;
 
     Q_SLOT void execState();
 
-    int m_baseDuration;
-    QVector<pk::signal::morse::char_t> m_morseSignal;
-    QVector<pk::signal::morse::char_t>::const_iterator m_signIterator;
+    QVector<char> m_currentSignal; //< must always be ASCII
+    const pk::signal::morse::char_t *m_currentMorseChar;
     pk::bbdevice::Flashlight *m_light;
-    SenderState m_senderState;
+    int m_baseDuration;
+    int m_currentCharIdx;
+    state_t m_senderState;
     bool m_sending;
 };
 

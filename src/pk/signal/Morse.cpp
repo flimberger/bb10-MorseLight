@@ -23,40 +23,19 @@ namespace signal
 namespace morse
 {
 
-static void append(QVector<char_t> &vector, const char_t *morseChar)
+QString ToString(const char_t *signal)
 {
-    for ( ; *morseChar != EOS; ++morseChar) {
-        vector.append(*morseChar);
-    }
-    vector.append(EOS);
-}
+    QString str;
 
-QVector<char_t> FromString(const QString &string)
-{
-    auto morseChars = QVector<char_t> {};
-    auto end = string.constEnd();
-
-    for (auto i = string.constBegin(); i != end; ++i) {
-        if ('A' <= i->toAscii() && i->toAscii() <= 'Z') {
-            auto c = i->toAscii();
-
-            append(morseChars, LETTER_TABLE[c - 'A']);
-        } else if ('a' <= i->toAscii() && i->toAscii() <= 'z') {
-            auto c = i->toAscii();
-
-            append(morseChars, LETTER_TABLE[c - 'a']);
-        } else if ('0' <= i->toAscii() && i->toAscii() <= '9') {
-            auto c = i->toAscii();
-
-            append(morseChars, DIGIT_TABLE[c - '0']);
-        } else if (*i == ' ') {
-            Q_ASSERT(morseChars.last() == EOS);
-            morseChars.last() = EOW;
+    while (*signal != EOS && *signal != EOW) {
+        if (*signal++ == DOT) {
+            str += ".";
+        } else {
+            str += "-";
         }
     }
-    morseChars.last() = EOM;
 
-    return morseChars;
+    return str;
 }
 
 QString ToString(const QVector<char_t> &signal)
@@ -78,8 +57,6 @@ QString ToString(const QVector<char_t> &signal)
         case EOW:
             string += "   ";
             break;
-        case EOM:
-            break; // shut the compiler up
         }
     }
 
@@ -122,6 +99,7 @@ const char_t DIGIT_6[] = { DASH, DOT,  DOT,  DOT,  DOT,  EOS };
 const char_t DIGIT_7[] = { DASH, DASH, DOT,  DOT,  DOT,  EOS };
 const char_t DIGIT_8[] = { DASH, DASH, DASH, DOT,  DOT,  EOS };
 const char_t DIGIT_9[] = { DASH, DASH, DASH, DASH, DOT,  EOS };
+const char_t WORD_DELIMETER = EOW;
 
 const char_t *const LETTER_TABLE[] = {
     LETTER_A,
