@@ -42,27 +42,76 @@ TabbedPane {
                 leftPadding: topPadding
                 layout: DockLayout {}
 
-                Label {
-                    text: ""
+                Container {
+                    property string message
                     horizontalAlignment: HorizontalAlignment.Center
                     verticalAlignment: VerticalAlignment.Center
-
-                    textStyle {
-                        base: SystemDefaults.TextStyles.BigText
+                    layout: StackLayout {
+                        orientation: LayoutOrientation.LeftToRight
                     }
-
+                    
+                    Label { // part already sent
+                        id: sentChars
+                        text: ""
+                        
+                        textStyle {
+                            base: SystemDefaults.TextStyles.BigText
+                            textAlign: TextAlign.Right
+                        }
+                    
+                    } // Label
+                    Label { // current character
+                        id: currentChar
+                        text: ""
+                        
+                        textStyle {
+                            base: SystemDefaults.TextStyles.BigText
+                            color: Color.Red
+                            textAlign: TextAlign.Center
+                        }
+                    } // Label
+                    Label { // part not yet sent
+                        id: remainingChars
+                        text: ""
+                        
+                        textStyle {
+                            base: SystemDefaults.TextStyles.BigText
+                            textAlign: TextAlign.Left
+                        }
+                    } // Label
+                    
                     onCreationCompleted: {
-                        _sender.sendingChanged.connect(setText)
+                        _sender.sendingChanged.connect(setText);
+                        _sender.currentCharIdxChanged.connect(showChar);
                     }
-
+                    
                     function setText(sending) {
                         if (sending) {
-                            text = messageField.text;
+                            message = messageField.text;
                         } else {
-                            text = "";
+                            sentChars.text = "";
+                            currentChar.text = "";
+                            remainingChars.text = "";
                         }
                     }
-                } // Label
+                    
+                    function showChar(charIdx) {
+                        if (message == "") {
+                            console.log("MessageView warning: message is empty");
+                        }
+                        if (charIdx > 0) {
+                            sentChars.text = message.substring(0, charIdx);
+                        } else {
+                            sentChars.text = "";
+                        }
+                        currentChar.text = message.charAt(charIdx);
+                        if (charIdx < message.length - 1) {
+                            remainingChars.text = message.substring(charIdx + 1, message.length);
+                        } else {
+                            remainingChars.text = "";
+                        }
+                    }
+                } // Container
 
                 TextField {
                     id: messageField

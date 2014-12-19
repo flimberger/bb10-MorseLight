@@ -187,12 +187,14 @@ loop:
         case EOW:
             qDebug("State machine: EOW; End of word");
             ++m_currentCharIdx;
+            emit currentCharIdxChanged(m_currentCharIdx);
             m_senderState = NEXT_SIG_CHAR;
             waitFactor = LONG_FACTOR;
             break;
         case EOS:
             qDebug("State machine: EOS; End of sign");
             ++m_currentCharIdx;
+            emit currentCharIdxChanged(m_currentCharIdx);
             m_senderState = NEXT_SIG_CHAR;
             waitFactor = SHORT_FACTOR;
             break;
