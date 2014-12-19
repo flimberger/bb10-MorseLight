@@ -157,7 +157,7 @@ TabbedPane {
 
                 Button {
                     text: qsTr("Light") + Retranslate.onLocaleOrLanguageChanged
-                    horizontalAlignment: HorizontalAlignment.Center
+                    horizontalAlignment: HorizontalAlignment.Fill
                     verticalAlignment: VerticalAlignment.Bottom
 
                     onClicked: {
